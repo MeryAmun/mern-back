@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const userSchema = new mongoose.Schema({
+  id: mongoose.Schema.Types.ObjectId,
   username: {
     type: String,
     required: true,
@@ -29,8 +30,8 @@ const userSchema = new mongoose.Schema({
 
 //hash password
 
-userSchema.prev('save', async function (next) {
-  if (this.isModified(password)) {
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
     this.password = bcrypt.hashSync(this.password, 10)
   }
   next()
@@ -48,4 +49,4 @@ userSchema.methods.generateToken = async function () {
   }
 }
 
-module.exports = new mongoose.model('User', userSchema)
+module.exports = mongoose.model('User', userSchema)
