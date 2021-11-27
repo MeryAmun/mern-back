@@ -1,6 +1,0 @@
-{
-  "env": {
-    "MONGO_ATLAS_PSSWD": "mamba2021",
-    "SECRET_KEY": "anythingyouwant"
-  }
-}

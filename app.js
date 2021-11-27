@@ -5,8 +5,9 @@ const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser')
 const userRoute = require('./routes/userRoutes')
+const messageRoute = require('./routes/messageRoute')
 const bodyParser = require('body-parser')
-
+dotenv.config()
 const app = express()
 
 mongoose
@@ -27,8 +28,8 @@ mongoose
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-// app.use(bodyParser.urlencoded({ extended: false }))
-// app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -45,12 +46,13 @@ app.use((req, res, next) => {
 //routes
 
 app.use('/users', userRoute)
+app.use('/message', messageRoute)
 app.get('/', (req, res, next) => {
   res.send('Hello black world')
 })
 
 //listen
 
-app.listen(6000, () => {
-  console.log('We are live on port 6000')
+app.listen(3001, () => {
+  console.log('We are live on port 3001')
 })
