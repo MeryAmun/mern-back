@@ -62,29 +62,10 @@ router.post('/register', (req, res, next) => {
     })
 })
 
-//message
-router.post('/message', (req, res, next) => {
-  const message = new Message({
-    _id: new mongoose.Types.ObjectId(),
-    name: req.body.name,
-    email: req.body.email,
-    message: req.body.message,
+router.get("'/logout", (req, res, next) => {
+  res.clearCookie('jwt', { path: '/' })
+  res.status(200).json({
+    message: 'user logged out',
   })
-  console.log(message)
-  message
-    .save()
-    .then((result) => {
-      console.log(result)
-      res.status(201).json({
-        message: 'message sent',
-      })
-    })
-    .catch((err) => {
-      console.log(err)
-      res.status(500).json({
-        error: err,
-      })
-    })
 })
-
 module.exports = router
