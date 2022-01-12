@@ -1,42 +1,42 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
-const Message = require('../models/messageModel')
+const authCheck = require('../middleware/authCheck')
 const router = express.Router()
 
 //login route
 
-router.post('/login', (req, res, next) => {
-  const password = req.body.password
-  User.findOne({ email: req.body.email })
-    .exec()
-    .then((user) => {
-      if (user.length < 1) {
+router.post('/login', async (req, res, next) => {
+  try {
+    const password = req.body.password
+    const user = await User.findOne({ email: req.body.email })
+
+    if (user.length < 1) {
+      return res.status(401).json({
+        message: 'Auth Failed',
+      })
+    }
+    const isMatch = await bcrypt.compare(password, user.password, (err) => {
+      if (err) {
         return res.status(401).json({
-          message: 'Auth Failed',
+          message: 'Auth failed',
         })
       }
-      bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-          return res.status(401).json({
-            message: 'Auth failed',
-          })
-        }
-        if (result) {
-          const token = user.generateToken()
-          res.cookie('jwt', token, {
-            espiresIn: new Date(Date.now() + 86400000),
-            httpOnly: true,
-          })
-          return res.status(200).json({
-            massage: 'Auth successful',
-          })
-        }
-      })
+      if (isMatch) {
+        const token = user.generateToken()
+        res.cookie('jwt', token, {
+          expiresIn: new Date(Date.now() + 86400000),
+          httpOnly: true,
+        })
+        return res.status(200).json({
+          message: 'Auth successful',
+        })
+      }
     })
+  } catch (error) {}
 })
+
 //register user
 router.post('/register', (req, res, next) => {
   const user = new User({
@@ -62,10 +62,12 @@ router.post('/register', (req, res, next) => {
     })
 })
 
-router.get("'/logout", (req, res, next) => {
+router.get('/logout', (req, res, next) => {
   res.clearCookie('jwt', { path: '/' })
   res.status(200).json({
     message: 'user logged out',
   })
 })
+
+router.get('/auth', authCheck, (req, res, next) => {})
 module.exports = router
