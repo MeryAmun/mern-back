@@ -9,27 +9,17 @@ const bodyParser = require('body-parser')
 dotenv.config()
 const app = express()
 
-mongoose
-  .connect(
-    'mongodb+srv://mamba:mamba2021@transport.jlugw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() => {
-    console.log('connection successful')
-  })
-  .catch((err) => {
-    console.log(err)
-  })
-
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+app.use(
+  cors({
+    credentials: true,
+    origin: 'https://react-node-bootstrapp-2022.netlify.app/',
+  })
+)
 
 // app.use((req, res, next) => {
 //   res.header('Access-Control-Allow-Origin', '*')
@@ -54,6 +44,32 @@ app.get('/', (req, res, next) => {
 
 //listen
 
-app.listen(3001, () => {
-  console.log('We are live on port 3001')
-})
+let PORT = process.env.PORT
+const host = '0.0.0.0'
+
+const connected = mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('connection successful')
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+const startServer = async () => {
+  try {
+    await connected.then(() => {
+      if (PORT == null || PORT == '') {
+        PORT = 8000
+      }
+      app.listen(PORT, host, () => {
+        console.log(`we are live on port ${PORT}`)
+      })
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+startServer()
